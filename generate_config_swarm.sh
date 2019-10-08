@@ -1,9 +1,22 @@
 #!/usr/bin/env bash
-
+#
+#Black        0;30     Dark Gray     1;30
+#Red          0;31     Light Red     1;31
+#Green        0;32     Light Green   1;32
+#Brown/Orange 0;33     Yellow        1;33
+#Blue         0;34     Light Blue    1;34
+#Purple       0;35     Light Purple  1;35
+#Cyan         0;36     Light Cyan    1;36
+#Light Gray   0;37     White         1;37
 set -o pipefail
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+GREEN='\033[0;32m'
+WHITE='\033[1;37m'
 
 if [[ "$(uname -r)" =~ ^4\.15\.0-60 ]]; then
-  echo "DO NOT RUN mailcow ON THIS UBUNTU KERNEL!";
+  echo "DO NOT RUN mailcoRED='\033[0;31m'w ON THIS UBUNTU KERNEL!";
   echo "Please update to 5.x or use another distribution."
   exit 1
 fi
@@ -31,14 +44,14 @@ if [ -f mailsrv.conf ]; then
 fi
 
 
-echo "Press enter to confirm the detected value '[value]' where applicable or enter a custom value."
+echo -e " ${GREEN}Press enter to confirm the detected value '[value]' where applicable or enter a custom value. ${WHITE}"
 VOLUMES_CURRENT_PATH=$(pwd)
 
 if [ ! -z "$(ls -A ${VOLUMES_CURRENT_PATH}/data)" ]
     then
-      echo "Info: data folder is found in ${VOLUMES_CURRENT_PATH}."
+      echo -e "${GREEN}Info: data folder is found in ${VOLUMES_CURRENT_PATH}.${WHITE}"
     else
-      echo "Error: in ${VOLUMES_CURRENT_PATH} no data folder !!!!"
+      echo -e "${RED}Error: in ${VOLUMES_CURRENT_PATH} no data folder !!!! ${WHITE}"
         exit 1;
 fi
 
@@ -48,21 +61,45 @@ while [ -z "${VOLUMES_ROOT_PATH}" ]; do
    then
      VOLUMES_ROOT_PATH=${VOLUMES_CURRENT_PATH}
    else
-     echo "Copying data folders to destination : $VOLUMES_ROOT_PATH"
+     echo -e "${YELLOW}Copying data folders to destination : $VOLUMES_ROOT_PATH ${WHITE}"
      mkdir -p ${VOLUMES_ROOT_PATH}/data && cp -r ${VOLUMES_CURRENT_PATH}/data/ ${VOLUMES_ROOT_PATH}
 
      if [ ! -z "$(ls -A ${VOLUMES_ROOT_PATH}/data)" ]
          then
-           echo "Info: data folder copied to  ${VOLUMES_ROOT_PATH}."
+           echo -e "${GREEN}Info: data folder copied to  ${VOLUMES_ROOT_PATH}.${WHITE}"
          else
-           echo "Error copy to  ${VOLUMES_ROOT_PATH}  !!!!"
+           echo -e "${RED}Error copy data to  ${VOLUMES_ROOT_PATH}  !!!!${WHITE}"
              exit 1;
      fi
+     echo -e "${YELLOW}Copying helper-scripts folders to destination : $VOLUMES_ROOT_PATH ${WHITE}"
+     mkdir -p ${VOLUMES_ROOT_PATH}/helper-scripts && cp -r ${VOLUMES_CURRENT_PATH}/helper-scripts/ ${VOLUMES_ROOT_PATH}
+
+     if [ ! -z "$(ls -A ${VOLUMES_ROOT_PATH}/helper-scripts)" ]
+         then
+           echo -e "${GREEN}Info: helper-scripts folder copied to  ${VOLUMES_ROOT_PATH}.${WHITE}"
+         else
+           echo -e "${RED}Error copy helper-scripts to  ${VOLUMES_ROOT_PATH}  !!!! ${WHITE}"
+             exit 1;
+     fi
+
   fi
 done
 
-echo "Root path is: ${VOLUMES_ROOT_PATH}"
 
+echo -e "${BLUE} Root path is: ${VOLUMES_ROOT_PATH} ${WHITE}"
+
+echo -e "${YELLOW}Create volume folders to destination : $VOLUMES_ROOT_PATH ${WHITE}"
+mkdir -p ${VOLUMES_ROOT_PATH}/volumes
+echo "Volume folder" > ${VOLUMES_ROOT_PATH}/volumes/README.md
+#&& cp -r ${VOLUMES_CURRENT_PATH}/volumes/ ${VOLUMES_ROOT_PATH}
+
+if [ ! -z "$(ls -A ${VOLUMES_ROOT_PATH}/volumes)" ]
+    then
+      echo -e "${GREEN}Info: Volume folder created in ${VOLUMES_ROOT_PATH}.${WHITE}"
+    else
+      echo -e "${RED}Error Volume folder creation in ${VOLUMES_ROOT_PATH}  !!!!${WHITE}"
+        exit 1;
+fi
 
 
 
@@ -70,7 +107,7 @@ while [ -z "${MAILSRV_HOSTNAME}" ]; do
   read -p "Mail server hostname (FQDN) - this is not your mail domain, but your mail servers hostname: " -e MAILSRV_HOSTNAME
   DOTS=${MAILSRV_HOSTNAME//[^.]};
   if [ ${#DOTS} -lt 2 ] && [ ! -z ${MAILSRV_HOSTNAME} ]; then
-    echo "${MAILSRV_HOSTNAME} is not a FQDN"
+    echo -e "${RED}${MAILSRV_HOSTNAME} is not a FQDN ${WHITE}"
     MAILSRV_HOSTNAME=
   fi
 done
